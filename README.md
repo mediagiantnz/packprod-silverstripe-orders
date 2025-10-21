@@ -1,20 +1,38 @@
-# Packaging Products Order Import System
+# Packaging Products Order Import & Analytics System
 
-Automated system for importing complete order data from Packaging Products email notifications into AWS DynamoDB for review collection and business analytics.
+Automated system for importing complete order data from Packaging Products email notifications into AWS DynamoDB, with REST API for review collection and business analytics dashboards.
 
 ## Overview
 
-This solution processes order notification emails from Packaging Products' SilverStripe e-commerce platform and stores comprehensive order data in AWS DynamoDB, enabling targeted customer review campaigns and business intelligence.
+This solution processes order notification emails from Packaging Products' SilverStripe e-commerce platform, stores comprehensive order data in AWS DynamoDB, and provides a REST API for building React-based analytics dashboards and business intelligence tools.
 
 ### Architecture
 
 ```
-Email Notification → n8n → AWS Lambda → DynamoDB (2 tables)
+┌─────────────────────────────────────────────────────────────────┐
+│  DATA INGESTION                                                 │
+│  Email Notification → n8n → Import Lambda → DynamoDB           │
+└─────────────────────────────────────────────────────────────────┘
+                                    ↓
+                          ┌─────────────────────┐
+                          │  DynamoDB (2 tables) │
+                          │  • RocketReview_Contacts│
+                          │  • packprod-weborders   │
+                          └─────────────────────┘
+                                    ↓
+┌─────────────────────────────────────────────────────────────────┐
+│  DATA ACCESS API                                                │
+│  React Dashboard ← API Gateway ← Query Lambda ← DynamoDB       │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 **Two-Table Design:**
 1. **RocketReview_Contacts** - Contact records for review workflows (backward compatible)
 2. **packprod-weborders** - Complete order records with tags (`ClientName: Packaging Products`, `Project: WebOrders`)
+
+**Dual Lambda Architecture:**
+1. **importPackagingProductsContacts** - Write orders and contacts (from n8n)
+2. **queryPackagingProductsOrders** - Read-only API for React dashboards
 
 ## Features
 
@@ -36,6 +54,14 @@ Email Notification → n8n → AWS Lambda → DynamoDB (2 tables)
 - Regional customer analysis
 - High-value customer tracking
 - Order history per customer
+
+✅ **REST API for Dashboards**
+- Query orders with filtering (date range, value, customer)
+- Customer list with metrics (lifetime value, order count)
+- Product analytics (top products by revenue/quantity)
+- Sales reports (daily/weekly/monthly timelines)
+- Dashboard overview (today/week/month metrics)
+- Full React integration examples
 
 ## Quick Start
 
@@ -77,19 +103,25 @@ See [`DEPLOYMENT-DUAL-TABLE.md`](DEPLOYMENT-DUAL-TABLE.md) for complete instruct
 ## Repository Structure
 
 ```
-├── index-dual-table.mjs           # Lambda function (production)
-├── n8n-extract-complete-order.js  # n8n extraction code
+├── index-dual-table.mjs              # Import Lambda (write orders/contacts)
+├── query-orders-lambda.mjs           # Query Lambda (read-only API)
+├── n8n-extract-complete-order-v2.js  # n8n extraction code (latest)
 ├── Rocket Review - PackProd Enhanced.json  # n8n workflow
-├── create-table.sh                # DynamoDB table creation
-├── dynamodb-table-schema.json     # Table definition
-├── sample-complete-payload.json   # Test data
-├── DEPLOYMENT-DUAL-TABLE.md       # Full deployment guide
-├── QUICK-REFERENCE.md             # Commands & queries
-├── README-FINAL.md                # Detailed documentation
-└── lambda-extracted/              # Original Lambda code (reference)
+├── create-table.sh                   # DynamoDB table creation
+├── setup-api-endpoints.sh            # API Gateway setup script
+├── dynamodb-table-schema.json        # Table definition
+├── sample-complete-payload.json      # Test data
+├── DEPLOYMENT-DUAL-TABLE.md          # Import Lambda deployment guide
+├── API-GATEWAY-SETUP.md              # Query API deployment guide
+├── REACT-INTEGRATION-GUIDE.md        # React dashboard integration
+├── QUICK-REFERENCE.md                # Commands & queries
+├── README-FINAL.md                   # Detailed documentation
+└── lambda-extracted/                 # Original Lambda code (reference)
 ```
 
-## API Endpoint
+## API Endpoints
+
+### Import API (n8n → Lambda)
 
 **POST** `https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/admin/contacts/import/packaging-products`
 
@@ -142,6 +174,35 @@ See [`DEPLOYMENT-DUAL-TABLE.md`](DEPLOYMENT-DUAL-TABLE.md) for complete instruct
   }
 }
 ```
+
+### Query API (React Dashboard → Lambda)
+
+**Base URL:** `https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/api`
+
+**Orders:**
+- `GET /orders` - List all orders with filtering
+- `GET /orders/{orderID}` - Get single order details
+
+**Customers:**
+- `GET /customers` - List all customers with metrics
+- `GET /customers/{contactID}` - Get customer details
+- `GET /customers/{contactID}/orders` - Get customer's order history
+
+**Reports:**
+- `GET /reports/overview` - Dashboard overview (today/week/month)
+- `GET /reports/products` - Product analytics (top by revenue/quantity)
+- `GET /reports/sales` - Sales timeline (daily/weekly/monthly)
+
+**Example:**
+```bash
+# Get dashboard overview
+curl https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/api/reports/overview
+
+# Get orders from last 30 days
+curl "https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/api/orders?startDate=2025-09-21&endDate=2025-10-21"
+```
+
+See [API-GATEWAY-SETUP.md](API-GATEWAY-SETUP.md) for deployment and [REACT-INTEGRATION-GUIDE.md](REACT-INTEGRATION-GUIDE.md) for React examples.
 
 ## Use Cases
 
@@ -209,10 +270,15 @@ See [`QUICK-REFERENCE.md`](QUICK-REFERENCE.md) for more query examples.
 
 ## Documentation
 
-- **[DEPLOYMENT-DUAL-TABLE.md](DEPLOYMENT-DUAL-TABLE.md)** - Step-by-step deployment guide
+### Data Import
+- **[DEPLOYMENT-DUAL-TABLE.md](DEPLOYMENT-DUAL-TABLE.md)** - Import Lambda deployment guide
 - **[QUICK-REFERENCE.md](QUICK-REFERENCE.md)** - Commands, queries, troubleshooting
 - **[README-FINAL.md](README-FINAL.md)** - Complete detailed documentation
-- **[IMPLEMENTATION-GUIDE.md](IMPLEMENTATION-GUIDE.md)** - Enhanced features guide
+
+### React Dashboard API
+- **[API-GATEWAY-SETUP.md](API-GATEWAY-SETUP.md)** - Query Lambda and API Gateway setup
+- **[REACT-INTEGRATION-GUIDE.md](REACT-INTEGRATION-GUIDE.md)** - React hooks and component examples
+- **[setup-api-endpoints.sh](setup-api-endpoints.sh)** - Automated API Gateway configuration
 
 ## Monitoring
 
