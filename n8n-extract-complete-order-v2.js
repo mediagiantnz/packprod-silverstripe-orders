@@ -162,7 +162,7 @@ const customer = {
   if (phoneLabelMatch) customer.phone = tidyPhone(phoneLabelMatch[1]);
 }
 
-// 3) Contact name from Order details block (line after account)
+// 3) Contact name and Company from Order details block
 {
   const orderDetailsBlock = extractBetween(text, "Order details", 1500);
   const lines = orderDetailsBlock
@@ -170,23 +170,14 @@ const customer = {
     .map(l => l.trim())
     .filter(l => l.length > 0 && !l.includes("Email:") && !l.includes("Phone:") && !l.includes("("));
 
+  // First line is contact name
   if (lines.length >= 1) {
     customer.contact_name = lines[0];
   }
-}
 
-// 4) Company from Delivery address block (second line)
-{
-  const deliveryBlock = extractBetween(text, "Delivery address", 1500);
-  if (deliveryBlock) {
-    const lines = deliveryBlock
-      .split("\n")
-      .map(l => l.trim())
-      .filter(l => l.length > 0 && !l.match(/^\d{8,}/)); // filter out phone-only lines
-
-    if (lines.length >= 2) {
-      customer.company = lines[1];
-    }
+  // Second line is company name (if it exists and isn't just the contact name repeated)
+  if (lines.length >= 2 && lines[1] !== lines[0]) {
+    customer.company = lines[1];
   }
 }
 
