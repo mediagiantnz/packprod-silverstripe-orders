@@ -1,0 +1,148 @@
+{
+  "name": "Rocket Review - PackProd Enhanced with Full Order Data",
+  "nodes": [
+    {
+      "parameters": {
+        "format": "resolved",
+        "options": {}
+      },
+      "id": "4c546774-8a45-417d-8cb2-080fadfffff9",
+      "name": "IMAP Email",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        -64
+      ],
+      "credentials": {
+        "imap": {
+          "id": "aHv6cY54Q4bJA2Bt",
+          "name": "PackProd@sms.automateai.co.nz"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Enhanced extraction code - extracts complete order data\n// Get the HTML content from the previous node\nconst html = $input.first().json.html || $input.first().json.body || $input.first().json.content || \"\";\n\n// --- Helpers ---\nfunction generateGUID() {\n  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n    const r = Math.random() * 16 | 0, v = (c === 'x') ? r : ((r & 0x3) | 0x8);\n    return v.toString(16);\n  });\n}\n\n// Convert basic HTML to plain text with line breaks\nfunction htmlToText(s = \"\") {\n  return s\n    .replace(/<\\s*br\\s*\\/?>/gi, \"\\n\")\n    .replace(/<\\/\\s*(p|div|li|tr|td|h\\d)\\s*>/gi, \"\\n\")\n    .replace(/<[^>]+>/g, \"\")\n    .replace(/&nbsp;/g, \" \")\n    .replace(/&amp;/g, \"&\")\n    .replace(/&lt;/g, \"<\")\n    .replace(/&gt;/g, \">\")\n    .replace(/\\r/g, \"\")\n    .replace(/[ \\t]+/g, \" \")\n    .replace(/\\n{2,}/g, \"\\n\")\n    .trim();\n}\n\nfunction extractBetween(text, startLabel, maxLen = 1200) {\n  const i = text.indexOf(startLabel);\n  if (i === -1) return \"\";\n  return text.slice(i + startLabel.length, i + startLabel.length + maxLen);\n}\n\nfunction tidyPhone(raw) {\n  if (!raw) return \"\";\n  raw = raw.trim();\n  const plus = raw.startsWith(\"+\") ? \"+\" : \"\";\n  const digits = raw.replace(/[^\\d]/g, \"\");\n  return plus + digits;\n}\n\nfunction extractValue(text, pattern) {\n  const match = text.match(pattern);\n  return match ? match[1].trim() : \"\";\n}\n\n// --- Extraction ---\nconst text = htmlToText(html);\n\n// Order Header Information\nconst order = {\n  order_reference: extractValue(text, /Order reference:\\s*(\\d+)/i),\n  order_date: extractValue(text, /Order date:\\s*([^\\n]+)/i),\n  greentree_order_reference: extractValue(text, /Greentree order reference:\\s*(\\d+)/i),\n  greentree_id: extractValue(text, /Greentree ID:\\s*([\\d.]+)/i),\n  greentree_status: extractValue(text, /Greentree st[au]tus:\\s*([^\\n]+)/i),\n  cms_shop_reference: extractValue(text, /CMS Shop reference:\\s*(\\d+)/i),\n  cms_shop_id: extractValue(text, /CMS Shop ID:\\s*(\\d+)/i)\n};\n\n// Customer/Contact Information\nconst customer = {\n  contact_id: generateGUID(),\n  account_name: \"\",\n  account_code: \"\",\n  contact_name: \"\",\n  company: \"\",\n  email: \"\",\n  phone: \"\",\n  created_at: new Date().toISOString()\n};\n\n// 1) Account (e.g. \"PPL Web Sales (100014)\")\n{\n  const m = text.match(/([^\\n(]+?)\\s*\\((\\d{5,7})\\)/);\n  if (m) {\n    customer.account_name = m[1].trim();\n    customer.account_code = m[2].trim();\n  }\n}\n\n// 2) Email and Phone from Order details block\n{\n  const orderDetailsBlock = extractBetween(text, \"Order details\", 1500);\n  const emailLabelMatch = orderDetailsBlock.match(/Email:\\s*([^\\s<>\\n]+@[^\\s<>\\n]+)/i);\n  if (emailLabelMatch) customer.email = emailLabelMatch[1].trim();\n\n  const phoneLabelMatch = orderDetailsBlock.match(/Phone:\\s*([+()0-9 \\-]+)/i);\n  if (phoneLabelMatch) customer.phone = tidyPhone(phoneLabelMatch[1]);\n}\n\n// 3) Delivery address for name & company\n{\n  const deliveryBlock = extractBetween(text, \"Delivery address\", 1500);\n  if (deliveryBlock) {\n    const lines = deliveryBlock\n      .split(\"\\n\")\n      .map(l => l.trim())\n      .filter(l => l.length > 0);\n\n    if (lines.length >= 2) {\n      customer.contact_name = customer.contact_name || lines[0];\n      customer.company = customer.company || lines[1];\n    }\n  }\n}\n\n// Delivery Address (detailed)\nconst delivery = {\n  name: \"\",\n  company: \"\",\n  street: \"\",\n  city: \"\",\n  country: \"\",\n  phone: \"\"\n};\n\n{\n  const deliveryBlock = extractBetween(text, \"Delivery address\", 1500);\n  if (deliveryBlock) {\n    const lines = deliveryBlock\n      .split(\"\\n\")\n      .map(l => l.trim())\n      .filter(l => l.length > 0 && !l.match(/^\\d{8,}/)); // filter out phone-only lines\n\n    if (lines.length >= 1) delivery.name = lines[0];\n    if (lines.length >= 2) delivery.company = lines[1];\n    if (lines.length >= 3) delivery.street = lines[2];\n    if (lines.length >= 4) delivery.city = lines[3];\n    if (lines.length >= 5) delivery.country = lines[4];\n\n    const phoneMatch = deliveryBlock.match(/(\\d{8,})/);\n    if (phoneMatch) delivery.phone = tidyPhone(phoneMatch[1]);\n  }\n}\n\n// Order Items\nconst items = [];\n{\n  // Look for line items pattern: \"CODE - Description\" followed by pricing info\n  const itemPattern = /([A-Z0-9]+)\\s*-\\s*([^\\n]+?)(?=\\s*•|\\n)/gi;\n  let match;\n\n  while ((match = itemPattern.exec(text)) !== null) {\n    const productCode = match[1].trim();\n    const description = match[2].trim();\n\n    // Find quantity and price info for this item\n    const afterItem = text.substring(match.index);\n    const priceMatch = afterItem.match(/\\$(\\d+\\.?\\d*)\\s*each\\s*\\+\\s*GST\\s+(\\d+)\\s+\\$(\\d+\\.?\\d*)\\s*\\+\\s*GST/i);\n\n    if (priceMatch) {\n      items.push({\n        product_code: productCode,\n        description: description,\n        unit_price: parseFloat(priceMatch[1]),\n        quantity: parseInt(priceMatch[2]),\n        total_price: parseFloat(priceMatch[3])\n      });\n    }\n  }\n}\n\n// Order Totals\nconst totals = {\n  subtotal: extractValue(text, /Sub-total\\s+\\$?([\\d.]+)/i),\n  freight: extractValue(text, /Freight[^\\n]*?\\$?([\\d.]+)/i),\n  freight_description: extractValue(text, /Freight\\s*\\(([^)]+)\\)/i),\n  gst: extractValue(text, /GST\\s+\\$?([\\d.]+)/i),\n  total: extractValue(text, /^Total\\s+\\$?([\\d.]+)/im)\n};\n\n// Payment Details\nconst payment = {\n  payment_type: extractValue(text, /Payment type:\\s*([^\\n]+)/i),\n  transaction_id: extractValue(text, /PxPay Transaction ID:\\s*([^\\n]+)/i),\n  amount: extractValue(text, /PxPay Amount:\\s*([^\\n]+)/i)\n};\n\n// --- Return complete order data ---\nreturn {\n  json: {\n    clientID: \"7b0d485f-8ef9-45b0-881a-9d8f4447ced2\",\n    order: order,\n    customer: customer,\n    delivery: delivery,\n    items: items,\n    totals: totals,\n    payment: payment\n  }\n};"
+      },
+      "id": "8507dc84-8f2c-4117-b462-4bc06dfcc768",
+      "name": "Extract Complete Order Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        -64
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "authentication": "coreImapAccount",
+        "resource": "email",
+        "operation": "moveEmail",
+        "sourceMailbox": {
+          "__rl": true,
+          "value": "INBOX",
+          "mode": "list",
+          "cachedResultName": "INBOX"
+        },
+        "emailUid": "={{ $('IMAP Email').item.json.attributes.uid }}",
+        "destinationMailbox": {
+          "__rl": true,
+          "value": "Trash",
+          "mode": "list",
+          "cachedResultName": "Trash"
+        }
+      },
+      "type": "n8n-nodes-imap.imap",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -320
+      ],
+      "id": "7fe76677-f7d9-446c-a2f5-12a6bf553eaa",
+      "name": "Delete the email",
+      "credentials": {
+        "imap": {
+          "id": "aHv6cY54Q4bJA2Bt",
+          "name": "PackProd@sms.automateai.co.nz"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/admin/contacts/import/packaging-products",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "name": "Import Complete Order via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        256,
+        -304
+      ],
+      "id": "f5dc3d78-7f4e-4ade-bbff-c9222c957f9f",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "IMAP Email": {
+      "main": [
+        [
+          {
+            "node": "Extract Complete Order Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Complete Order Data": {
+      "main": [
+        [
+          {
+            "node": "Import Complete Order via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Import Complete Order via API": {
+      "main": [
+        [
+          {
+            "node": "Delete the email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "enhanced-v1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9ef64c99e9961c7c8997b8f13de11666189549c97ae99c321a6f7c3dba6ac661"
+  },
+  "id": "52Nccu23M4JywNgZ-enhanced",
+  "tags": []
+}

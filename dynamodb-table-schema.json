@@ -1,0 +1,108 @@
+{
+  "TableName": "packprod-weborders",
+  "KeySchema": [
+    {
+      "AttributeName": "orderID",
+      "KeyType": "HASH"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "orderID",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "contactID",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "clientID",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "order_reference",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "createdAt",
+      "AttributeType": "S"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "contactID-index",
+      "KeySchema": [
+        {
+          "AttributeName": "contactID",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "createdAt",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    },
+    {
+      "IndexName": "clientID-createdAt-index",
+      "KeySchema": [
+        {
+          "AttributeName": "clientID",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "createdAt",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    },
+    {
+      "IndexName": "order_reference-index",
+      "KeySchema": [
+        {
+          "AttributeName": "order_reference",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      },
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 5,
+        "WriteCapacityUnits": 5
+      }
+    }
+  ],
+  "BillingMode": "PROVISIONED",
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  },
+  "Tags": [
+    {
+      "Key": "ClientName",
+      "Value": "Packaging Products"
+    },
+    {
+      "Key": "Project",
+      "Value": "WebOrders"
+    },
+    {
+      "Key": "Environment",
+      "Value": "Production"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "clientID": "7b0d485f-8ef9-45b0-881a-9d8f4447ced2",
+  "order": {
+    "order_reference": "442856",
+    "order_date": "21/10/2025 11:49 am",
+    "greentree_order_reference": "442856",
+    "greentree_id": "3493.344774",
+    "greentree_status": "Entered",
+    "cms_shop_reference": "285118",
+    "cms_shop_id": "285118"
+  },
+  "customer": {
+    "contact_id": "9b6d1b10-8e7f-485a-abe3-506168567a61",
+    "account_name": "PPL Web Sales",
+    "account_code": "100014",
+    "contact_name": "ash harrington",
+    "company": "Ash H C/O Kingfisher Gifts",
+    "email": "ashleighlouise21@yahoo.co.nz",
+    "phone": "0210399366",
+    "created_at": "2025-10-21T00:49:00.000Z",
+    "status": "pending"
+  },
+  "delivery": {
+    "name": "ash harrington",
+    "company": "Ash H C/O Kingfisher Gifts",
+    "street": "70 High St",
+    "city": "Waipawa",
+    "country": "New Zealand",
+    "phone": "0210399366"
+  },
+  "items": [
+    {
+      "product_code": "CCPP2",
+      "description": "PP2 Cardboard Box",
+      "unit_price": 1.00,
+      "quantity": 25,
+      "total_price": 25.00
+    },
+    {
+      "product_code": "CCPP4",
+      "description": "PP4 Cardboard Box",
+      "unit_price": 1.12,
+      "quantity": 25,
+      "total_price": 28.00
+    }
+  ],
+  "totals": {
+    "subtotal": "53.00",
+    "freight": "15.56",
+    "freight_description": "Hawke's Bay",
+    "gst": "10.28",
+    "total": "78.84"
+  },
+  "payment": {
+    "payment_type": "PxPay",
+    "transaction_id": "0000000a097310ca",
+    "amount": "NZ$78.84"
+  }
+}

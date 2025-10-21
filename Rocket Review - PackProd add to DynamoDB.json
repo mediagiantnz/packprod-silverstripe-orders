@@ -1,0 +1,158 @@
+{
+  "name": "Rocket Review - PackProd add to DynamoDB",
+  "nodes": [
+    {
+      "parameters": {
+        "format": "resolved",
+        "options": {}
+      },
+      "id": "4c546774-8a45-417d-8cb2-080fadfffff9",
+      "name": "IMAP Email",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [
+        -416,
+        -64
+      ],
+      "credentials": {
+        "imap": {
+          "id": "aHv6cY54Q4bJA2Bt",
+          "name": "PackProd@sms.automateai.co.nz"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the HTML content from the previous node\nconst html = $input.first().json.html || $input.first().json.body || $input.first().json.content || \"\";\n\n// --- Helpers ---\nfunction generateGUID() {\n  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();\n  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {\n    const r = Math.random() * 16 | 0, v = (c === 'x') ? r : ((r & 0x3) | 0x8);\n    return v.toString(16);\n  });\n}\n\n// Convert basic HTML to plain text with line breaks so regex over text is easier/robust.\nfunction htmlToText(s = \"\") {\n  return s\n    // line break tags\n    .replace(/<\\s*br\\s*\\/?>/gi, \"\\n\")\n    .replace(/<\\/\\s*(p|div|li|tr|td|h\\d)\\s*>/gi, \"\\n\")\n    // remove all other tags\n    .replace(/<[^>]+>/g, \"\")\n    // decode a few common entities\n    .replace(/&nbsp;/g, \" \")\n    .replace(/&amp;/g, \"&\")\n    .replace(/&lt;/g, \"<\")\n    .replace(/&gt;/g, \">\")\n    // normalise whitespace\n    .replace(/\\r/g, \"\")\n    .replace(/[ \\t]+/g, \" \")\n    .replace(/\\n{2,}/g, \"\\n\")\n    .trim();\n}\n\nfunction extractBetween(text, startLabel, maxLen = 1200) {\n  const i = text.indexOf(startLabel);\n  if (i === -1) return \"\";\n  return text.slice(i + startLabel.length, i + startLabel.length + maxLen);\n}\n\nfunction tidyPhone(raw) {\n  if (!raw) return \"\";\n  // keep leading +, strip non-digits otherwise\n  raw = raw.trim();\n  const plus = raw.startsWith(\"+\") ? \"+\" : \"\";\n  const digits = raw.replace(/[^\\d]/g, \"\");\n  return plus + digits;\n}\n\n// --- Extraction ---\nconst text = htmlToText(html);\n\n// Defaults (will be overwritten by matches)\nconst customer = {\n  contact_id: generateGUID(),\n  account_name: \"\",\n  account_code: \"\",\n  contact_name: \"\",\n  company: \"\",\n  email: \"\",\n  phone: \"\",\n  created_at: new Date().toISOString()\n};\n\n// 1) Account (e.g. \"PPL Web Sales (100014)\")\n{\n  const m = text.match(/([^\\n(]+?)\\s*\\((\\d{5,7})\\)/); // name (code)\n  if (m) {\n    customer.account_name = m[1].trim();\n    customer.account_code = m[2].trim();\n  }\n}\n\n// 2) Prefer the \"Order details\" block for email/phone (labelled)\n{\n  const orderDetailsBlock = extractBetween(text, \"Order details\", 1500);\n  const emailLabelMatch = orderDetailsBlock.match(/Email:\\s*([^\\s<>\\n]+@[^\\s<>\\n]+)/i);\n  if (emailLabelMatch) customer.email = emailLabelMatch[1].trim();\n\n  const phoneLabelMatch = orderDetailsBlock.match(/Phone:\\s*([+()0-9 \\-]+)/i);\n  if (phoneLabelMatch) customer.phone = tidyPhone(phoneLabelMatch[1]);\n}\n\n// 3) Delivery address block for name & company (first two lines after label)\n{\n  const deliveryBlock = extractBetween(text, \"Delivery address\", 1500);\n  if (deliveryBlock) {\n    const lines = deliveryBlock\n      .split(\"\\n\")\n      .map(l => l.trim())\n      .filter(l => l.length > 0);\n\n    // Find first two *meaningful* lines (name, company) before street/city lines.\n    // Heuristic: the first two non-empty lines are the customer name and company\n    // for this email structure.\n    if (lines.length >= 2) {\n      customer.contact_name = customer.contact_name || lines[0];\n      customer.company = customer.company || lines[1];\n    }\n  }\n}\n\n// 4) Fallbacks (in case Delivery block didn't populate name/company)\nif (!customer.contact_name || !customer.company) {\n  // Try lines around Order details (often: Name, Company, Email, Phone)\n  const orderDetailsBlock = extractBetween(text, \"Order details\", 1500);\n  const odLines = orderDetailsBlock\n    .split(\"\\n\")\n    .map(l => l.trim())\n    .filter(l => l && !/^Order details$/i.test(l));\n\n  // Try to detect name/company as the two lines immediately before the \"Email:\" line\n  const emailIdx = odLines.findIndex(l => /^Email:\\s*/i.test(l));\n  if (emailIdx > 1) {\n    const maybeCompany = odLines[emailIdx - 1];\n    const maybeName = odLines[emailIdx - 2];\n    if (!customer.company) customer.company = maybeCompany;\n    if (!customer.contact_name) customer.contact_name = maybeName;\n  }\n}\n\n// Final tidy: if phone still empty, try a generic phone anywhere\nif (!customer.phone) {\n  const anyPhone = text.match(/Phone:\\s*([+()0-9 \\-]+)/i);\n  if (anyPhone) customer.phone = tidyPhone(anyPhone[1]);\n}\n\n// --- Return ---\nreturn { json: { customer } };"
+      },
+      "id": "8507dc84-8f2c-4117-b462-4bc06dfcc768",
+      "name": "Extract Contacts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -144,
+        -64
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "authentication": "coreImapAccount",
+        "resource": "email",
+        "operation": "moveEmail",
+        "sourceMailbox": {
+          "__rl": true,
+          "value": "INBOX",
+          "mode": "list",
+          "cachedResultName": "INBOX"
+        },
+        "emailUid": "={{ $('IMAP Email').item.json.attributes.uid }}",
+        "destinationMailbox": {
+          "__rl": true,
+          "value": "Trash",
+          "mode": "list",
+          "cachedResultName": "Trash"
+        }
+      },
+      "type": "n8n-nodes-imap.imap",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -320
+      ],
+      "id": "7fe76677-f7d9-446c-a2f5-12a6bf553eaa",
+      "name": "Delete the email",
+      "credentials": {
+        "imap": {
+          "id": "aHv6cY54Q4bJA2Bt",
+          "name": "PackProd@sms.automateai.co.nz"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/admin/contacts/import/packaging-products",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "clientID",
+              "value": "7b0d485f-8ef9-45b0-881a-9d8f4447ced2"
+            },
+            {
+              "name": "contacts",
+              "value": "=  {\n    \"clientID\": \"7b0d485f-8ef9-45b0-881a-9d8f4447ced2\",\n    \"contact\": {\n      \"contact_name\": \"{{ $json.customer.contact_name }}\",\n      \"email\": \"{{ $json.customer.email }}\",\n      \"phone\": \"{{ $json.customer.phone }}\",\n      \"company\": \"{{ $json.customer.company }}\",\n      \"ppl_account\": \"{{ $json.customer.account_name }}\",\n      \"ppl_account_number\": \"{{ $json.customer.account_code }}\"\n    }\n  }"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Import Contact via API1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        256,
+        -304
+      ],
+      "id": "f5dc3d78-7f4e-4ade-bbff-c9222c957f9f",
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "IMAP Email": {
+      "main": [
+        [
+          {
+            "node": "Extract Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Contacts": {
+      "main": [
+        [
+          {
+            "node": "Import Contact via API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Import Contact via API1": {
+      "main": [
+        [
+          {
+            "node": "Delete the email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "989106f6-f998-47ed-a856-76bc286a5221",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9ef64c99e9961c7c8997b8f13de11666189549c97ae99c321a6f7c3dba6ac661"
+  },
+  "id": "52Nccu23M4JywNgZ",
+  "tags": []
+}
