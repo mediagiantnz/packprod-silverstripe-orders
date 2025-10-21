@@ -49,7 +49,7 @@ const futureFeatures = [{
 }];
 export function AppSidebar() {
   return <Sidebar>
-      <SidebarContent className="bg-blue-300">
+      <SidebarContent className="bg-primary">
         <SidebarGroup>
           <SidebarGroupLabel>Packaging Products</SidebarGroupLabel>
           <SidebarGroupContent>
