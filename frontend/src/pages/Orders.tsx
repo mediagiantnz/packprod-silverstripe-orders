@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { ordersApi } from '@/services/orders';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -7,9 +7,13 @@ import { DateRangeFilter, DateRange } from '@/components/DateRangeFilter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, formatDate } from '@/utils/format';
-import { ShoppingCart, RefreshCw, Loader2 } from 'lucide-react';
+import { ShoppingCart, RefreshCw, Loader2, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+type SortField = 'date' | 'total' | 'customer' | 'items';
+type SortOrder = 'asc' | 'desc';
 
 export default function Orders() {
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -20,6 +24,9 @@ export default function Orders() {
     minTotal: '',
     maxTotal: '',
   });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<SortField>('date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const {
     data,
@@ -47,6 +54,46 @@ export default function Orders() {
   const orders = data?.pages.flatMap((page) => page.data) || [];
   const totalCount = data?.pages[0]?.meta?.count || 0;
 
+  // Client-side filtering and sorting
+  const filteredAndSortedOrders = useMemo(() => {
+    let filtered = orders;
+
+    // Search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter((order) =>
+        order.order_reference?.toLowerCase().includes(searchLower) ||
+        order.customer?.contact_name?.toLowerCase().includes(searchLower) ||
+        order.customer?.email?.toLowerCase().includes(searchLower) ||
+        order.customer?.company?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Sort
+    filtered = [...filtered].sort((a, b) => {
+      let compareValue = 0;
+
+      switch (sortField) {
+        case 'date':
+          compareValue = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          break;
+        case 'total':
+          compareValue = parseFloat(b.totals?.total || '0') - parseFloat(a.totals?.total || '0');
+          break;
+        case 'customer':
+          compareValue = (a.customer?.contact_name || '').localeCompare(b.customer?.contact_name || '');
+          break;
+        case 'items':
+          compareValue = (b.items?.length || 0) - (a.items?.length || 0);
+          break;
+      }
+
+      return sortOrder === 'asc' ? -compareValue : compareValue;
+    });
+
+    return filtered;
+  }, [orders, searchTerm, sortField, sortOrder]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -68,12 +115,23 @@ export default function Orders() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>Filters & Sorting</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <DateRangeFilter onDateChange={setDateRange} defaultPreset="thisMonth" />
-          
-          <div className="grid gap-4 md:grid-cols-2 mt-4">
+
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by order ID, customer, email, or company..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="text-sm font-medium mb-2 block">Min Total</label>
               <Input
@@ -93,13 +151,45 @@ export default function Orders() {
               />
             </div>
           </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Sort By</label>
+              <Select value={sortField} onValueChange={(value) => setSortField(value as SortField)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date">Order Date</SelectItem>
+                  <SelectItem value="total">Total Amount</SelectItem>
+                  <SelectItem value="customer">Customer Name</SelectItem>
+                  <SelectItem value="items">Item Count</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Order</label>
+              <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as SortOrder)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Highest/Newest First</SelectItem>
+                  <SelectItem value="asc">Lowest/Oldest First</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <Button
             onClick={() => {
               setDateRange({ startDate: '', endDate: '' });
               setFilters({ minTotal: '', maxTotal: '' });
+              setSearchTerm('');
             }}
             variant="outline"
-            className="mt-4"
+            className="w-full"
           >
             Clear All Filters
           </Button>
@@ -108,7 +198,7 @@ export default function Orders() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Orders ({orders.length} loaded)</CardTitle>
+          <CardTitle>All Orders ({filteredAndSortedOrders.length} {searchTerm ? 'found' : 'loaded'})</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -118,7 +208,7 @@ export default function Orders() {
               <p className="font-semibold mb-2">Error loading orders</p>
               <p className="text-sm text-muted-foreground">Failed to connect to API. Please check CORS settings.</p>
             </div>
-          ) : orders.length === 0 ? (
+          ) : filteredAndSortedOrders.length === 0 ? (
             <EmptyState
               icon={ShoppingCart}
               title="No orders found"
@@ -139,7 +229,7 @@ export default function Orders() {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map((order) => (
+                    {filteredAndSortedOrders.map((order) => (
                       <tr key={order.orderID} className="border-b last:border-0 hover:bg-muted/50">
                         <td className="py-3 px-4">
                           <Link to={`/orders/${order.orderID}`} className="text-primary hover:underline font-medium">

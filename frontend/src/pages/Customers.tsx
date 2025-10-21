@@ -7,13 +7,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { getCustomerSegment, getSegmentBadgeClass } from '@/utils/customer-segments';
 import { Users, Search, RefreshCw, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { CustomerSegment } from '@/types/customer';
+
+type SortField = 'name' | 'spend' | 'orders' | 'lastOrder';
+type SortOrder = 'asc' | 'desc';
 
 export default function Customers() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<SortField>('spend');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [segmentFilter, setSegmentFilter] = useState<CustomerSegment | 'All'>('All');
 
   const {
     data,
@@ -37,15 +45,46 @@ export default function Customers() {
 
   // Flatten all pages into a single array
   const customers = data?.pages.flatMap((page) => page.data) || [];
-  
-  // Client-side search (backend doesn't support search yet)
+
+  // Client-side filtering and sorting
   const filteredCustomers = useMemo(() => {
-    return customers.filter((c) =>
+    let filtered = customers.filter((c) =>
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.company.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [customers, searchTerm]);
+
+    // Filter by segment
+    if (segmentFilter !== 'All') {
+      filtered = filtered.filter((c) => c.metrics.segment === segmentFilter);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      let compareValue = 0;
+
+      switch (sortField) {
+        case 'name':
+          compareValue = a.name.localeCompare(b.name);
+          break;
+        case 'spend':
+          compareValue = parseFloat(b.metrics.totalSpend) - parseFloat(a.metrics.totalSpend);
+          break;
+        case 'orders':
+          compareValue = b.metrics.orderCount - a.metrics.orderCount;
+          break;
+        case 'lastOrder':
+          const dateA = a.metrics.lastOrderDate ? new Date(a.metrics.lastOrderDate).getTime() : 0;
+          const dateB = b.metrics.lastOrderDate ? new Date(b.metrics.lastOrderDate).getTime() : 0;
+          compareValue = dateB - dateA;
+          break;
+      }
+
+      return sortOrder === 'asc' ? -compareValue : compareValue;
+    });
+
+    return filtered;
+  }, [customers, searchTerm, segmentFilter, sortField, sortOrder]);
 
   return (
     <div className="space-y-6">
@@ -68,9 +107,9 @@ export default function Customers() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Search Customers</CardTitle>
+          <CardTitle>Filters & Sorting</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -80,6 +119,52 @@ export default function Customers() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Segment</label>
+              <Select value={segmentFilter} onValueChange={(value) => setSegmentFilter(value as CustomerSegment | 'All')}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="All">All Segments</SelectItem>
+                  <SelectItem value="VIP">VIP</SelectItem>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="New">New</SelectItem>
+                  <SelectItem value="Dormant">Dormant</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Sort By</label>
+              <Select value={sortField} onValueChange={(value) => setSortField(value as SortField)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="spend">Total Spend</SelectItem>
+                  <SelectItem value="orders">Order Count</SelectItem>
+                  <SelectItem value="lastOrder">Last Order Date</SelectItem>
+                  <SelectItem value="name">Name</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Order</label>
+              <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as SortOrder)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Highest First</SelectItem>
+                  <SelectItem value="asc">Lowest First</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>

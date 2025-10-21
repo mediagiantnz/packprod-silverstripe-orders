@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { productsApi } from '@/services/products';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
@@ -6,8 +6,12 @@ import { DateRangeFilter, DateRange } from '@/components/DateRangeFilter';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { formatCurrency, formatNumber } from '@/utils/format';
-import { RefreshCw, Package, Search } from 'lucide-react';
+import { RefreshCw, Package, Search, ArrowUpDown } from 'lucide-react';
+
+type SortField = 'revenue' | 'quantity' | 'orders' | 'code';
+type SortOrder = 'asc' | 'desc';
 
 export default function Products() {
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -15,6 +19,8 @@ export default function Products() {
     endDate: '',
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<SortField>('revenue');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const {
     data,
@@ -39,6 +45,34 @@ export default function Products() {
   });
 
   const allProducts = data?.pages.flatMap((page) => page.data?.products || []) || [];
+
+  // Sort products based on selected criteria
+  const sortedProducts = useMemo(() => {
+    const products = [...allProducts];
+
+    products.sort((a, b) => {
+      let compareValue = 0;
+
+      switch (sortField) {
+        case 'revenue':
+          compareValue = (b.total_revenue || 0) - (a.total_revenue || 0);
+          break;
+        case 'quantity':
+          compareValue = (b.total_quantity || 0) - (a.total_quantity || 0);
+          break;
+        case 'orders':
+          compareValue = (b.order_count || 0) - (a.order_count || 0);
+          break;
+        case 'code':
+          compareValue = a.product_code.localeCompare(b.product_code);
+          break;
+      }
+
+      return sortOrder === 'asc' ? -compareValue : compareValue;
+    });
+
+    return products;
+  }, [allProducts, sortField, sortOrder]);
 
   return (
     <div className="space-y-6">
@@ -65,7 +99,7 @@ export default function Products() {
         </CardHeader>
         <CardContent className="space-y-4">
           <DateRangeFilter onDateChange={setDateRange} defaultPreset="thisMonth" />
-          
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -74,6 +108,36 @@ export default function Products() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
             />
+          </div>
+
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-2 block">Sort By</label>
+              <Select value={sortField} onValueChange={(value) => setSortField(value as SortField)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="revenue">Revenue</SelectItem>
+                  <SelectItem value="quantity">Quantity Sold</SelectItem>
+                  <SelectItem value="orders">Order Count</SelectItem>
+                  <SelectItem value="code">Product Code</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-2 block">Order</label>
+              <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as SortOrder)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Highest First</SelectItem>
+                  <SelectItem value="asc">Lowest First</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -89,7 +153,7 @@ export default function Products() {
             </p>
           </div>
         </Card>
-      ) : allProducts.length === 0 ? (
+      ) : sortedProducts.length === 0 ? (
         <Card className="p-8">
           <div className="text-center text-muted-foreground">
             <Package className="h-12 w-12 mx-auto mb-3 opacity-50" />
@@ -101,11 +165,11 @@ export default function Products() {
         <>
           <Card>
             <CardHeader>
-              <CardTitle>Products ({formatNumber(allProducts.length)})</CardTitle>
+              <CardTitle>Products ({formatNumber(sortedProducts.length)})</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {allProducts.map((product) => (
+                {sortedProducts.map((product) => (
                   <div
                     key={product.product_code}
                     className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
