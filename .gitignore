@@ -35,7 +35,8 @@ yarn-error.log*
 
 # AWS credentials (just in case)
 credentials
-config
+/.aws/config
+/config
 
 # Test data (keep sample payloads but exclude actual customer data)
 Fwd_*.msg
