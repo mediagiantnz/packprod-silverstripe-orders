@@ -796,17 +796,26 @@ async function getProductReport(queryParams) {
 
   const products = Object.values(productMap);
 
-  // Sort by revenue (descending)
-  const sortedProducts = products.sort((a, b) => b.total_revenue - a.total_revenue);
+  // Sort by revenue (descending) for topByRevenue
+  const sortedByRevenue = [...products].sort((a, b) => b.total_revenue - a.total_revenue);
 
-  // Return products in the format expected by the frontend
+  // Sort by quantity (descending) for topByQuantity
+  const sortedByQuantity = [...products].sort((a, b) => b.total_quantity - a.total_quantity);
+
+  // Return products in format expected by both Products page and Reports page
   const productListData = {
-    products: sortedProducts
+    products: sortedByRevenue,  // For Products.tsx
+    topByRevenue: sortedByRevenue,  // For Reports.tsx
+    topByQuantity: sortedByQuantity,  // For Reports.tsx
+    summary: {  // For Reports.tsx
+      total_products: products.length,
+      total_orders_analyzed: orders.length
+    }
   };
 
   return formatResponse(productListData, {
-    count: sortedProducts.length,
-    total: sortedProducts.length
+    count: products.length,
+    total: products.length
   });
 }
 

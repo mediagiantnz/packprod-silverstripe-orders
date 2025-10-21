@@ -195,9 +195,9 @@ export default function Customers() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Name</th>
-                      <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Email</th>
                       <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Company</th>
+                      <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Contact</th>
+                      <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Email</th>
                       <th className="text-right py-3 px-4 font-medium text-sm text-muted-foreground">Orders</th>
                       <th className="text-right py-3 px-4 font-medium text-sm text-muted-foreground">Total Spend</th>
                       <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Last Order</th>
@@ -211,11 +211,11 @@ export default function Customers() {
                         <tr key={customer.contactID} className="border-b last:border-0 hover:bg-muted/50">
                           <td className="py-3 px-4">
                             <Link to={`/customers/${customer.contactID}`} className="text-primary hover:underline font-medium">
-                              {customer.name}
+                              {customer.company || customer.name}
                             </Link>
                           </td>
+                          <td className="py-3 px-4 text-muted-foreground">{customer.name}</td>
                           <td className="py-3 px-4 text-muted-foreground">{customer.email}</td>
-                          <td className="py-3 px-4">{customer.company || '-'}</td>
                           <td className="py-3 px-4 text-right">{customer.metrics.orderCount}</td>
                           <td className="py-3 px-4 text-right font-medium">{formatCurrency(customer.metrics.totalSpend)}</td>
                           <td className="py-3 px-4 text-muted-foreground">{formatDate(customer.metrics.lastOrderDate)}</td>
