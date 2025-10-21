@@ -106,7 +106,7 @@ export default function Dashboard() {
                           {order.order_reference}
                         </Link>
                       </td>
-                      <td className="py-3 px-4">{order.customer.contact_name}</td>
+                      <td className="py-3 px-4">{order.customer.company || order.customer.contact_name}</td>
                       <td className="py-3 px-4 text-muted-foreground">{formatDate(order.createdAt)}</td>
                       <td className="py-3 px-4 text-right font-medium">{formatCurrency(order.totals.total)}</td>
                     </tr>

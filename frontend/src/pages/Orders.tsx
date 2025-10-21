@@ -221,8 +221,8 @@ export default function Orders() {
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Order ID</th>
-                      <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Customer</th>
                       <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Company</th>
+                      <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Contact</th>
                       <th className="text-left py-3 px-4 font-medium text-sm text-muted-foreground">Date</th>
                       <th className="text-right py-3 px-4 font-medium text-sm text-muted-foreground">Items</th>
                       <th className="text-right py-3 px-4 font-medium text-sm text-muted-foreground">Total</th>
@@ -236,8 +236,8 @@ export default function Orders() {
                             {order.order_reference}
                           </Link>
                         </td>
-                        <td className="py-3 px-4">{order.customer.contact_name}</td>
-                        <td className="py-3 px-4 text-muted-foreground">{order.customer.company || '-'}</td>
+                        <td className="py-3 px-4">{order.customer.company || order.customer.contact_name}</td>
+                        <td className="py-3 px-4 text-muted-foreground">{order.customer.contact_name}</td>
                         <td className="py-3 px-4 text-muted-foreground">{formatDate(order.createdAt)}</td>
                         <td className="py-3 px-4 text-right">{order.items.length}</td>
                         <td className="py-3 px-4 text-right font-medium">{formatCurrency(order.totals.total)}</td>
