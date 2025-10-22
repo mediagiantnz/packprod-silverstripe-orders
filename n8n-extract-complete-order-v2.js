@@ -213,14 +213,41 @@ const delivery = {
 // Order Items - Extract from HTML table structure
 const items = extractItemsFromHTML(html);
 
-// Order Totals
+// Order Totals - Extract from the totals section more carefully
 const totals = {
-  subtotal: extractValue(text, /Sub-total\s+\$?([\d.]+)/i),
-  freight: extractValue(text, /Freight[^\n$]*?\$?([\d.]+)/i),
-  freight_description: extractValue(text, /Freight\s*\(([^)]+)\)/i),
-  gst: extractValue(text, /GST\s+\$?([\d.]+)/i),
-  total: extractValue(text, /^Total\s+\$?([\d.]+)/im)
+  subtotal: "",
+  freight: "",
+  freight_description: "",
+  gst: "",
+  total: ""
 };
+
+{
+  // Extract the totals section (after the items table)
+  const totalsSection = extractBetween(text, "Sub-total", 500);
+
+  if (totalsSection) {
+    // Extract subtotal
+    const subtotalMatch = totalsSection.match(/Sub-total\s+\$?([\d.,]+)/i);
+    if (subtotalMatch) totals.subtotal = subtotalMatch[1].replace(/,/g, '');
+
+    // Extract freight
+    const freightMatch = totalsSection.match(/Freight[^\n$]*?\$?([\d.,]+)/i);
+    if (freightMatch) totals.freight = freightMatch[1].replace(/,/g, '');
+
+    // Extract freight description
+    const freightDescMatch = totalsSection.match(/Freight\s*\(([^)]+)\)/i);
+    if (freightDescMatch) totals.freight_description = freightDescMatch[1].trim();
+
+    // Extract GST (more specific - should be on a line with "GST")
+    const gstMatch = totalsSection.match(/\bGST\b[^\n$]*?\$?([\d.,]+)/i);
+    if (gstMatch) totals.gst = gstMatch[1].replace(/,/g, '');
+
+    // Extract total (more specific - should be on a line with "Total" but not "Sub-total")
+    const totalMatch = totalsSection.match(/\bTotal\b[^\n$]*?\$?([\d.,]+)/i);
+    if (totalMatch) totals.total = totalMatch[1].replace(/,/g, '');
+  }
+}
 
 // Payment Details
 const payment = {
