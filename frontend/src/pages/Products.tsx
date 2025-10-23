@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ProductOrdersDialog } from '@/components/ProductOrdersDialog';
 import { formatCurrency, formatNumber } from '@/utils/format';
-import { RefreshCw, Package, Search, ArrowUpDown } from 'lucide-react';
+import { RefreshCw, Package, Search, ArrowUpDown, ExternalLink } from 'lucide-react';
 
 type SortField = 'revenue' | 'quantity' | 'orders' | 'code';
 type SortOrder = 'asc' | 'desc';
@@ -21,6 +22,7 @@ export default function Products() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('revenue');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const [selectedProduct, setSelectedProduct] = useState<{ code: string; description: string } | null>(null);
 
   const {
     data,
@@ -172,10 +174,14 @@ export default function Products() {
                 {sortedProducts.map((product) => (
                   <div
                     key={product.product_code}
-                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
+                    className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent/10 hover:border-primary/50 transition-all cursor-pointer group"
+                    onClick={() => setSelectedProduct({ code: product.product_code, description: product.description })}
                   >
                     <div className="flex-1">
-                      <div className="font-semibold text-lg">{product.product_code}</div>
+                      <div className="font-semibold text-lg flex items-center gap-2 group-hover:text-primary transition-colors">
+                        {product.product_code}
+                        <ExternalLink className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                       <div className="text-sm text-muted-foreground">{product.description}</div>
                       {product.last_ordered && (
                         <div className="text-xs text-muted-foreground mt-1">
@@ -225,6 +231,13 @@ export default function Products() {
           )}
         </>
       )}
+
+      {/* Product Orders Dialog */}
+      <ProductOrdersDialog
+        productCode={selectedProduct?.code || null}
+        productDescription={selectedProduct?.description}
+        onClose={() => setSelectedProduct(null)}
+      />
     </div>
   );
 }

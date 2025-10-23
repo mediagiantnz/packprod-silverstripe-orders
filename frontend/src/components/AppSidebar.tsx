@@ -49,16 +49,16 @@ const futureFeatures = [{
 }];
 export function AppSidebar() {
   return <Sidebar>
-      <SidebarContent className="bg-primary">
+      <SidebarContent className="bg-sidebar-background">
         <SidebarGroup>
-          <SidebarGroupLabel>Packaging Products</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-foreground font-bold text-lg">Packaging Products</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.map(item => <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.href} className={({
                   isActive
-                }) => isActive ? 'bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:opacity-90' : 'text-sidebar-foreground hover:bg-accent/10 hover:text-accent transition-colors'}>
+                }) => isActive ? 'bg-primary text-primary-foreground font-semibold hover:bg-primary-hover' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors'}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.name}</span>
                     </NavLink>
@@ -76,7 +76,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.href} className={({
                   isActive
-                }) => isActive ? 'bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:opacity-90' : 'text-sidebar-foreground hover:bg-accent/10 hover:text-accent transition-colors'}>
+                }) => isActive ? 'bg-primary text-primary-foreground font-semibold hover:bg-primary-hover' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors'}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.name}</span>
                       {item.badge && <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning font-medium">
