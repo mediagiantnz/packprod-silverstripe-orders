@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Deploy Campaigns Handler Lambda
-# Phase 4: Marketing Campaign Management (Placeholder Endpoints)
+# Phase 4: Marketing Campaign Management (Full Implementation)
 #
 # Prerequisites:
 # - AWS CLI configured with credentials for account 235494808985
 # - Region: ap-southeast-2
+# - npm dependencies installed (npm install)
 
 set -e
 
@@ -22,15 +23,21 @@ ROLE_ARN="arn:aws:iam::235494808985:role/lambda-dynamodb-role"
 REGION="ap-southeast-2"
 ZIP_FILE="lambda-campaigns-deploy.zip"
 
+# Install dependencies
+echo ""
+echo "Step 1: Installing dependencies..."
+npm install --production
+echo "✓ Dependencies installed"
+
 # Create deployment package
 echo ""
-echo "Step 1: Creating deployment package..."
-powershell Compress-Archive -Path campaigns-handler.mjs,package.json -DestinationPath $ZIP_FILE -Force
+echo "Step 2: Creating deployment package..."
+powershell Compress-Archive -Path campaigns-handler.mjs,node_modules,package.json -DestinationPath $ZIP_FILE -Force
 echo "✓ Deployment package created: $ZIP_FILE"
 
 # Check if function exists
 echo ""
-echo "Step 2: Checking if Lambda function exists..."
+echo "Step 3: Checking if Lambda function exists..."
 FUNCTION_EXISTS=$(aws lambda get-function --function-name $FUNCTION_NAME --region $REGION 2>&1 || echo "NotFound")
 
 if echo "$FUNCTION_EXISTS" | grep -q "NotFound"; then
@@ -45,8 +52,8 @@ if echo "$FUNCTION_EXISTS" | grep -q "NotFound"; then
     --region $REGION \
     --timeout 30 \
     --memory-size 256 \
-    --description "Campaigns API placeholder endpoints - Phase 4 feature (Coming Soon)" \
-    --tags ClientName="Packaging Products",Project="WebOrders"
+    --description "Marketing campaigns API with CRUD operations, SES email delivery, and customer segmentation" \
+    --tags ClientName="Packaging Products",Project="WebOrders",Component="MarketingCampaigns"
 
   echo "✓ Lambda function created: $FUNCTION_NAME"
 else
@@ -66,7 +73,7 @@ else
 
   aws lambda tag-resource \
     --resource $FUNCTION_ARN \
-    --tags ClientName="Packaging Products",Project="WebOrders" \
+    --tags ClientName="Packaging Products",Project="WebOrders",Component="MarketingCampaigns" \
     --region $REGION
 
   echo "✓ Tags updated"

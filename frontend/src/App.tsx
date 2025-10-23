@@ -13,6 +13,9 @@ import CustomerDetail from "./pages/CustomerDetail";
 import Products from "./pages/Products";
 import Reports from "./pages/Reports";
 import Campaigns from "./pages/Campaigns";
+import CampaignNew from "./pages/CampaignNew";
+import CampaignEdit from "./pages/CampaignEdit";
+import CampaignAnalytics from "./pages/CampaignAnalytics";
 import Alerts from "./pages/Alerts";
 import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
@@ -43,6 +46,9 @@ const App = () => (
                   <Route path="/products" element={<Products />} />
                   <Route path="/reports" element={<Reports />} />
                   <Route path="/campaigns" element={<Campaigns />} />
+                  <Route path="/campaigns/new" element={<CampaignNew />} />
+                  <Route path="/campaigns/:id/edit" element={<CampaignEdit />} />
+                  <Route path="/campaigns/:id/analytics" element={<CampaignAnalytics />} />
                   <Route path="/alerts" element={<Alerts />} />
                   <Route path="/admin/users" element={<UserManagement />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -84,9 +84,32 @@ else
   echo "✓ /api/campaigns/{id} resource already exists: $CAMPAIGN_ID_RESOURCE_ID"
 fi
 
+# Create /api/campaigns/{id}/send resource
+echo ""
+echo "Step 4: Creating /api/campaigns/{id}/send resource..."
+SEND_RESOURCE_EXISTS=$(aws apigateway get-resources \
+  --rest-api-id $API_ID \
+  --region $REGION \
+  --query 'items[?path==`/api/campaigns/{id}/send`].id' \
+  --output text)
+
+if [ -z "$SEND_RESOURCE_EXISTS" ]; then
+  SEND_RESOURCE_ID=$(aws apigateway create-resource \
+    --rest-api-id $API_ID \
+    --parent-id $CAMPAIGN_ID_RESOURCE_ID \
+    --path-part send \
+    --region $REGION \
+    --query 'id' \
+    --output text)
+  echo "✓ Created /api/campaigns/{id}/send resource: $SEND_RESOURCE_ID"
+else
+  SEND_RESOURCE_ID=$SEND_RESOURCE_EXISTS
+  echo "✓ /api/campaigns/{id}/send resource already exists: $SEND_RESOURCE_ID"
+fi
+
 # Create /api/campaigns/{id}/analytics resource
 echo ""
-echo "Step 4: Creating /api/campaigns/{id}/analytics resource..."
+echo "Step 5: Creating /api/campaigns/{id}/analytics resource..."
 ANALYTICS_RESOURCE_EXISTS=$(aws apigateway get-resources \
   --rest-api-id $API_ID \
   --region $REGION \
@@ -235,32 +258,38 @@ setup_cors() {
 
 # /api/campaigns - GET, POST
 echo ""
-echo "Step 5: Configuring /api/campaigns endpoints..."
+echo "Step 6: Configuring /api/campaigns endpoints..."
 setup_method "$CAMPAIGNS_RESOURCE_ID" "GET" "/api/campaigns"
 setup_method "$CAMPAIGNS_RESOURCE_ID" "POST" "/api/campaigns"
 setup_cors "$CAMPAIGNS_RESOURCE_ID" "/api/campaigns"
 
 # /api/campaigns/{id} - GET, PUT, DELETE
 echo ""
-echo "Step 6: Configuring /api/campaigns/{id} endpoints..."
+echo "Step 7: Configuring /api/campaigns/{id} endpoints..."
 setup_method "$CAMPAIGN_ID_RESOURCE_ID" "GET" "/api/campaigns/{id}"
 setup_method "$CAMPAIGN_ID_RESOURCE_ID" "PUT" "/api/campaigns/{id}"
 setup_method "$CAMPAIGN_ID_RESOURCE_ID" "DELETE" "/api/campaigns/{id}"
 setup_cors "$CAMPAIGN_ID_RESOURCE_ID" "/api/campaigns/{id}"
 
+# /api/campaigns/{id}/send - POST
+echo ""
+echo "Step 8: Configuring /api/campaigns/{id}/send endpoint..."
+setup_method "$SEND_RESOURCE_ID" "POST" "/api/campaigns/{id}/send"
+setup_cors "$SEND_RESOURCE_ID" "/api/campaigns/{id}/send"
+
 # /api/campaigns/{id}/analytics - GET
 echo ""
-echo "Step 7: Configuring /api/campaigns/{id}/analytics endpoint..."
+echo "Step 9: Configuring /api/campaigns/{id}/analytics endpoint..."
 setup_method "$ANALYTICS_RESOURCE_ID" "GET" "/api/campaigns/{id}/analytics"
 setup_cors "$ANALYTICS_RESOURCE_ID" "/api/campaigns/{id}/analytics"
 
 # Deploy API
 echo ""
-echo "Step 8: Deploying API to production..."
+echo "Step 10: Deploying API to production..."
 aws apigateway create-deployment \
   --rest-api-id $API_ID \
   --stage-name prod \
-  --description "Added campaigns endpoints - Phase 4 placeholders" \
+  --description "Added campaigns endpoints - Full implementation with CRUD, email sending, and analytics" \
   --region $REGION > /dev/null
 
 echo "✓ API deployed to production"
@@ -276,6 +305,7 @@ echo "  POST   /api/campaigns"
 echo "  GET    /api/campaigns/{id}"
 echo "  PUT    /api/campaigns/{id}"
 echo "  DELETE /api/campaigns/{id}"
+echo "  POST   /api/campaigns/{id}/send"
 echo "  GET    /api/campaigns/{id}/analytics"
 echo ""
 echo "Base URL: https://${API_ID}.execute-api.${REGION}.amazonaws.com/prod"

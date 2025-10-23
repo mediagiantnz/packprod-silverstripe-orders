@@ -1,4 +1,4 @@
-import { Home, ShoppingCart, Users, Package, BarChart3 } from 'lucide-react';
+import { Home, ShoppingCart, Users, Package, BarChart3, Mail } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { FEATURES } from '@/config/features';
@@ -28,6 +28,11 @@ const navigation = [{
   href: '/reports',
   icon: BarChart3,
   enabled: FEATURES.REPORTS
+}, {
+  name: 'Campaigns',
+  href: '/campaigns',
+  icon: Mail,
+  enabled: true
 }];
 export function AppSidebar() {
   return <Sidebar>

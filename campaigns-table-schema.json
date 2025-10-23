@@ -1,0 +1,79 @@
+{
+  "TableName": "packprod-campaigns",
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "campaignID",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "clientID",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "status",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "createdAt",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "campaignID",
+      "KeyType": "HASH"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "clientID-status-index",
+      "KeySchema": [
+        {
+          "AttributeName": "clientID",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "status",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    },
+    {
+      "IndexName": "clientID-createdAt-index",
+      "KeySchema": [
+        {
+          "AttributeName": "clientID",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "createdAt",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "BillingMode": "PAY_PER_REQUEST",
+  "StreamSpecification": {
+    "StreamEnabled": false
+  },
+  "Tags": [
+    {
+      "Key": "ClientName",
+      "Value": "Packaging Products"
+    },
+    {
+      "Key": "Project",
+      "Value": "WebOrders"
+    },
+    {
+      "Key": "Component",
+      "Value": "MarketingCampaigns"
+    }
+  ]
+}
