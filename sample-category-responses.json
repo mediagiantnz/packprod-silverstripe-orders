@@ -1,0 +1,464 @@
+{
+  "sample_responses": {
+    "get_all_categories": {
+      "endpoint": "GET /api/products/categories",
+      "url": "https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/api/products/categories",
+      "response": {
+        "success": true,
+        "data": {
+          "categories": [
+            {
+              "name": "Cardboard Boxes",
+              "description": "Cardboard packaging boxes in various sizes for shipping and storage",
+              "keywords": ["box", "cardboard", "PP", "wine bottle", "shipping", "packaging"],
+              "product_count": 15,
+              "products": ["CCPP2", "CCPP4", "CCPP6", "CCPP8", "CCPP10", "CCPP12", "CCQ", "CC1WB", "CC2WB", "CC6WB", "CCWINEBOX", "CCSMALL", "CCMEDIUM", "CCLARGE", "CCXLARGE"]
+            },
+            {
+              "name": "Tape & Adhesives",
+              "description": "Packaging tape, premium tape, masking tape, and tape dispensers for sealing packages",
+              "keywords": ["tape", "dispenser", "clear pak", "premium", "adhesive", "packing", "fragile"],
+              "product_count": 11,
+              "products": ["TSPAKPTH", "TSCLEAR", "TSBROWN", "TSWHITE", "TSFRAGILE", "TSMASK", "TSDOUBLE", "MTDD2", "MTDD3", "DISPENSER", "TAPEGUN"]
+            },
+            {
+              "name": "Bags & Packaging",
+              "description": "Plastic bags, paper bags, zip lock bags, and specialty packaging bags",
+              "keywords": ["bag", "plastic", "paper", "zip lock", "degradable", "HDPE", "LDPE", "produce"],
+              "product_count": 9,
+              "products": ["BAGPLASTIC", "BAGPAPER", "BAGZIP", "BAGDEGRADABLE", "BAGHDPE", "BAGLDPE", "BAGPRODUCE", "BAGGARMENT", "BAGVACUUM"]
+            },
+            {
+              "name": "Labels & Markers",
+              "description": "Shipping labels, price gun labels, warning labels, specialty stickers, and permanent markers",
+              "keywords": ["label", "sticker", "meto", "shipping", "glass with care", "top stow", "fragile", "marker", "pen"],
+              "product_count": 12,
+              "products": ["LMETBBB", "LMETPB", "LSHIP12", "1LMED4", "LFRAGILE", "LTHISUP", "LGLASSCARE", "LBLANK", "LBARCODE", "OMVIVCT", "MARKER", "SHARPIE"]
+            },
+            {
+              "name": "Gift Packaging",
+              "description": "Wrapping paper, ribbons, bows, and tissue paper for gift presentation",
+              "keywords": ["wrapping paper", "gift wrap", "roll", "GSM", "ribbon", "bow", "tissue", "present"],
+              "product_count": 11,
+              "products": ["PWR0900B", "PWRGOLD", "PWRSILVER", "PWRRED", "RIBBONRED", "RIBBONSILVER", "RIBBONGOLD", "BOW", "TISSUEWHITE", "TISSUERED", "TISSUEGREEN"]
+            },
+            {
+              "name": "Protective Materials",
+              "description": "Stretch film, bubble wrap, foam sheets, and protective wrapping materials",
+              "keywords": ["film", "stretch", "cast", "power grade", "hand film", "bubble", "foam", "protection", "corner"],
+              "product_count": 9,
+              "products": ["YSFHCA20", "STRETCHFILM", "BUBBLEWRAP", "BUBBLEROLL", "FOAMSHEET", "CORNERPRO", "EDGEPRO", "PAPERPACKING", "AIRPILLOW"]
+            },
+            {
+              "name": "Mailers & Envelopes",
+              "description": "Shurtuff mailers, bubble mailers, padded envelopes, and shipping envelopes",
+              "keywords": ["mailer", "shurtuff", "envelope", "bubble", "padded", "DL", "C4", "C5", "window"],
+              "product_count": 9,
+              "products": ["BMST5", "MAILERWHITE", "MAILERKRAFT", "MAILERPADDED", "ENVDL", "ENVC4", "ENVC5", "ENVB4", "ENVWINDOW"]
+            },
+            {
+              "name": "Cleaning Supplies",
+              "description": "Cleaning cloths, wipes, and maintenance supplies for packaging areas",
+              "keywords": ["cloth", "microfiber", "wipe", "antibacterial", "dust", "cleaner", "spray", "maintenance"],
+              "product_count": 6,
+              "products": ["CLOTHMICRO", "WIPEANTI", "WIPEDUST", "CLEANER", "SPRAY", "DUSTER"]
+            },
+            {
+              "name": "Safety Equipment",
+              "description": "Disposable gloves, safety gloves, cutting tools, and protective equipment",
+              "keywords": ["gloves", "latex", "powder free", "disposable", "safety", "extra large", "nitrile", "vinyl", "cutter"],
+              "product_count": 7,
+              "products": ["HGPLPFC", "GLOVENITRILE", "GLOVEVINYL", "GLOVELATEX", "CUTTERKNIFE", "SCISSORS", "APRON"]
+            }
+          ],
+          "metadata": {
+            "total_categories": 9,
+            "total_products": 95,
+            "version": "2.0.0",
+            "last_updated": "2025-10-23"
+          }
+        },
+        "error": null,
+        "meta": {
+          "count": 9,
+          "limit": null,
+          "total": null,
+          "lastEvaluatedKey": null
+        }
+      }
+    },
+    "get_products_all": {
+      "endpoint": "GET /api/reports/products",
+      "url": "https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/api/reports/products?limit=3",
+      "response": {
+        "success": true,
+        "data": {
+          "products": [
+            {
+              "product_code": "CCPP2",
+              "description": "PP2 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 125,
+              "total_revenue": 125.00,
+              "order_count": 5
+            },
+            {
+              "product_code": "CCPP4",
+              "description": "PP4 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 75,
+              "total_revenue": 84.00,
+              "order_count": 3
+            },
+            {
+              "product_code": "TSPAKPTH",
+              "description": "Clear Packaging Tape Premium",
+              "category": "Tape & Adhesives",
+              "total_quantity": 200,
+              "total_revenue": 150.00,
+              "order_count": 10
+            }
+          ],
+          "topByRevenue": [
+            {
+              "product_code": "TSPAKPTH",
+              "description": "Clear Packaging Tape Premium",
+              "category": "Tape & Adhesives",
+              "total_quantity": 200,
+              "total_revenue": 150.00,
+              "order_count": 10
+            },
+            {
+              "product_code": "CCPP2",
+              "description": "PP2 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 125,
+              "total_revenue": 125.00,
+              "order_count": 5
+            },
+            {
+              "product_code": "CCPP4",
+              "description": "PP4 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 75,
+              "total_revenue": 84.00,
+              "order_count": 3
+            }
+          ],
+          "topByQuantity": [
+            {
+              "product_code": "TSPAKPTH",
+              "description": "Clear Packaging Tape Premium",
+              "category": "Tape & Adhesives",
+              "total_quantity": 200,
+              "total_revenue": 150.00,
+              "order_count": 10
+            },
+            {
+              "product_code": "CCPP2",
+              "description": "PP2 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 125,
+              "total_revenue": 125.00,
+              "order_count": 5
+            },
+            {
+              "product_code": "CCPP4",
+              "description": "PP4 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 75,
+              "total_revenue": 84.00,
+              "order_count": 3
+            }
+          ],
+          "summary": {
+            "total_products": 3,
+            "total_orders_analyzed": 14,
+            "category_filter": null
+          }
+        },
+        "error": null,
+        "meta": {
+          "count": 3,
+          "limit": null,
+          "total": 3,
+          "lastEvaluatedKey": null
+        }
+      }
+    },
+    "get_products_filtered_cardboard": {
+      "endpoint": "GET /api/reports/products?category=Cardboard Boxes",
+      "url": "https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/api/reports/products?category=Cardboard%20Boxes",
+      "response": {
+        "success": true,
+        "data": {
+          "products": [
+            {
+              "product_code": "CCPP2",
+              "description": "PP2 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 125,
+              "total_revenue": 125.00,
+              "order_count": 5
+            },
+            {
+              "product_code": "CCPP4",
+              "description": "PP4 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 75,
+              "total_revenue": 84.00,
+              "order_count": 3
+            }
+          ],
+          "topByRevenue": [
+            {
+              "product_code": "CCPP2",
+              "description": "PP2 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 125,
+              "total_revenue": 125.00,
+              "order_count": 5
+            },
+            {
+              "product_code": "CCPP4",
+              "description": "PP4 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 75,
+              "total_revenue": 84.00,
+              "order_count": 3
+            }
+          ],
+          "topByQuantity": [
+            {
+              "product_code": "CCPP2",
+              "description": "PP2 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 125,
+              "total_revenue": 125.00,
+              "order_count": 5
+            },
+            {
+              "product_code": "CCPP4",
+              "description": "PP4 Cardboard Box",
+              "category": "Cardboard Boxes",
+              "total_quantity": 75,
+              "total_revenue": 84.00,
+              "order_count": 3
+            }
+          ],
+          "summary": {
+            "total_products": 2,
+            "total_orders_analyzed": 14,
+            "category_filter": "Cardboard Boxes"
+          }
+        },
+        "error": null,
+        "meta": {
+          "count": 2,
+          "limit": null,
+          "total": 2,
+          "lastEvaluatedKey": null
+        }
+      }
+    },
+    "get_products_filtered_tape": {
+      "endpoint": "GET /api/reports/products?category=Tape & Adhesives",
+      "url": "https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/api/reports/products?category=Tape%20%26%20Adhesives",
+      "response": {
+        "success": true,
+        "data": {
+          "products": [
+            {
+              "product_code": "TSPAKPTH",
+              "description": "Clear Packaging Tape Premium",
+              "category": "Tape & Adhesives",
+              "total_quantity": 200,
+              "total_revenue": 150.00,
+              "order_count": 10
+            },
+            {
+              "product_code": "MTDD2",
+              "description": "Tape Dispenser Desktop",
+              "category": "Tape & Adhesives",
+              "total_quantity": 15,
+              "total_revenue": 45.00,
+              "order_count": 3
+            }
+          ],
+          "topByRevenue": [
+            {
+              "product_code": "TSPAKPTH",
+              "description": "Clear Packaging Tape Premium",
+              "category": "Tape & Adhesives",
+              "total_quantity": 200,
+              "total_revenue": 150.00,
+              "order_count": 10
+            },
+            {
+              "product_code": "MTDD2",
+              "description": "Tape Dispenser Desktop",
+              "category": "Tape & Adhesives",
+              "total_quantity": 15,
+              "total_revenue": 45.00,
+              "order_count": 3
+            }
+          ],
+          "topByQuantity": [
+            {
+              "product_code": "TSPAKPTH",
+              "description": "Clear Packaging Tape Premium",
+              "category": "Tape & Adhesives",
+              "total_quantity": 200,
+              "total_revenue": 150.00,
+              "order_count": 10
+            },
+            {
+              "product_code": "MTDD2",
+              "description": "Tape Dispenser Desktop",
+              "category": "Tape & Adhesives",
+              "total_quantity": 15,
+              "total_revenue": 45.00,
+              "order_count": 3
+            }
+          ],
+          "summary": {
+            "total_products": 2,
+            "total_orders_analyzed": 14,
+            "category_filter": "Tape & Adhesives"
+          }
+        },
+        "error": null,
+        "meta": {
+          "count": 2,
+          "limit": null,
+          "total": 2,
+          "lastEvaluatedKey": null
+        }
+      }
+    },
+    "category_report": {
+      "endpoint": "GET /api/reports/categories",
+      "url": "https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod/api/reports/categories",
+      "response": {
+        "success": true,
+        "data": {
+          "summary": {
+            "totalCategories": 9,
+            "categoriesWithSales": 4,
+            "totalProductTypes": 95,
+            "ordersAnalyzed": 14,
+            "dateRange": {
+              "startDate": null,
+              "endDate": null
+            }
+          },
+          "categoryBreakdown": {
+            "Cardboard Boxes": {
+              "description": "Cardboard packaging boxes in various sizes for shipping and storage",
+              "keywords": ["box", "cardboard", "PP", "wine bottle", "shipping", "packaging"],
+              "totalRevenue": "209.00",
+              "totalQuantity": 200,
+              "orderCount": 8,
+              "products": [
+                {
+                  "product_code": "CCPP2",
+                  "description": "PP2 Cardboard Box",
+                  "totalRevenue": 125.00,
+                  "totalQuantity": 125,
+                  "orderCount": 5
+                },
+                {
+                  "product_code": "CCPP4",
+                  "description": "PP4 Cardboard Box",
+                  "totalRevenue": 84.00,
+                  "totalQuantity": 75,
+                  "orderCount": 3
+                }
+              ]
+            },
+            "Tape & Adhesives": {
+              "description": "Packaging tape, premium tape, masking tape, and tape dispensers for sealing packages",
+              "keywords": ["tape", "dispenser", "clear pak", "premium", "adhesive", "packing", "fragile"],
+              "totalRevenue": "195.00",
+              "totalQuantity": 215,
+              "orderCount": 13,
+              "products": [
+                {
+                  "product_code": "TSPAKPTH",
+                  "description": "Clear Packaging Tape Premium",
+                  "totalRevenue": 150.00,
+                  "totalQuantity": 200,
+                  "orderCount": 10
+                },
+                {
+                  "product_code": "MTDD2",
+                  "description": "Tape Dispenser Desktop",
+                  "totalRevenue": 45.00,
+                  "totalQuantity": 15,
+                  "orderCount": 3
+                }
+              ]
+            },
+            "Labels & Markers": {
+              "description": "Shipping labels, price gun labels, warning labels, specialty stickers, and permanent markers",
+              "keywords": ["label", "sticker", "meto", "shipping", "glass with care", "top stow", "fragile", "marker", "pen"],
+              "totalRevenue": "89.50",
+              "totalQuantity": 150,
+              "orderCount": 6,
+              "products": [
+                {
+                  "product_code": "LSHIP12",
+                  "description": "Shipping Labels 12-pack",
+                  "totalRevenue": 55.00,
+                  "totalQuantity": 100,
+                  "orderCount": 4
+                },
+                {
+                  "product_code": "OMVIVCT",
+                  "description": "Vivid Marker Black Chisel Tip",
+                  "totalRevenue": 34.50,
+                  "totalQuantity": 50,
+                  "orderCount": 2
+                }
+              ]
+            },
+            "Gift Packaging": {
+              "description": "Wrapping paper, ribbons, bows, and tissue paper for gift presentation",
+              "keywords": ["wrapping paper", "gift wrap", "roll", "GSM", "ribbon", "bow", "tissue", "present"],
+              "totalRevenue": "78.00",
+              "totalQuantity": 85,
+              "orderCount": 4,
+              "products": [
+                {
+                  "product_code": "PWR0900B",
+                  "description": "Wrapping Paper Roll 900mm Black",
+                  "totalRevenue": 78.00,
+                  "totalQuantity": 85,
+                  "orderCount": 4
+                }
+              ]
+            }
+          },
+          "metadata": {
+            "version": "2.0.0",
+            "last_updated": "2025-10-23",
+            "description": "Product category mapping for Packaging Products order system - Expanded version with 95+ product codes"
+          }
+        },
+        "error": null,
+        "meta": {
+          "count": null,
+          "limit": null,
+          "total": null,
+          "lastEvaluatedKey": null
+        }
+      }
+    }
+  },
+  "notes": {
+    "description": "Sample API responses showing product category functionality",
+    "note": "These are example responses - actual data will vary based on real orders in the system",
+    "generated": "2025-10-23",
+    "base_url": "https://bw4agz6xn4.execute-api.ap-southeast-2.amazonaws.com/prod"
+  }
+}

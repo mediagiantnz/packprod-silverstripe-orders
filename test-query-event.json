@@ -1,0 +1,6 @@
+{
+  "httpMethod": "GET",
+  "path": "/api/reports/overview",
+  "queryStringParameters": {},
+  "pathParameters": {}
+}

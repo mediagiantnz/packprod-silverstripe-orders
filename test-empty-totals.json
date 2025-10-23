@@ -1,0 +1,53 @@
+{
+  "clientID": "7b0d485f-8ef9-45b0-881a-9d8f4447ced2",
+  "customer": {
+    "contact_name": "Test Customer",
+    "email": "test@example.com",
+    "phone": "1234567890",
+    "company": "Test Company",
+    "account_name": "Test Account",
+    "account_code": "TEST001"
+  },
+  "order": {
+    "order_reference": "TEST-001",
+    "order_date": "23/10/2025 10:00 am",
+    "greentree_order_reference": "TEST-001",
+    "greentree_id": "TEST.001"
+  },
+  "items": [
+    {
+      "product_code": "PROD1",
+      "description": "Test Product 1",
+      "unit_price": 10.50,
+      "quantity": 2,
+      "total_price": 21.00
+    },
+    {
+      "product_code": "PROD2",
+      "description": "Test Product 2",
+      "unit_price": 15.75,
+      "quantity": 3,
+      "total_price": 47.25
+    }
+  ],
+  "totals": {
+    "subtotal": "",
+    "freight": "",
+    "gst": "",
+    "total": "",
+    "freight_description": ""
+  },
+  "payment": {
+    "payment_type": "Account",
+    "transaction_id": "",
+    "amount": ""
+  },
+  "delivery": {
+    "name": "Test Customer",
+    "company": "Test Company",
+    "street": "123 Test St",
+    "city": "Test City",
+    "country": "New Zealand",
+    "phone": "1234567890"
+  }
+}

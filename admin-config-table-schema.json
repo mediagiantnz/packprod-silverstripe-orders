@@ -1,0 +1,37 @@
+{
+  "TableName": "packprod-admin-config",
+  "KeySchema": [
+    {
+      "AttributeName": "configKey",
+      "KeyType": "HASH"
+    }
+  ],
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "configKey",
+      "AttributeType": "S"
+    }
+  ],
+  "BillingMode": "PAY_PER_REQUEST",
+  "Tags": [
+    {
+      "Key": "ClientName",
+      "Value": "Packaging Products"
+    },
+    {
+      "Key": "Project",
+      "Value": "WebOrders"
+    },
+    {
+      "Key": "Environment",
+      "Value": "Production"
+    }
+  ],
+  "StreamSpecification": {
+    "StreamEnabled": false
+  },
+  "SSESpecification": {
+    "Enabled": true,
+    "SSEType": "KMS"
+  }
+}

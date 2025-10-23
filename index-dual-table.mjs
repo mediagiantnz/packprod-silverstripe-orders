@@ -207,14 +207,39 @@ export const handler = async (event) => {
         total_price: item.total_price || 0
       })),
 
-      // Order totals
-      totals: {
-        subtotal: totalsData.subtotal || "",
-        freight: totalsData.freight || "",
-        freight_description: totalsData.freight_description || "",
-        gst: totalsData.gst || "",
-        total: totalsData.total || ""
-      },
+      // Order totals - calculate from line items if not provided
+      totals: (() => {
+        // Calculate subtotal from line items
+        const calculatedSubtotal = orderItems.reduce((sum, item) => {
+          return sum + (parseFloat(item.total_price) || 0);
+        }, 0);
+
+        // Use provided values or fallback to calculated
+        const subtotal = totalsData.subtotal && totalsData.subtotal !== ""
+          ? totalsData.subtotal
+          : calculatedSubtotal.toFixed(2);
+
+        const freight = totalsData.freight && totalsData.freight !== ""
+          ? totalsData.freight
+          : "0.00";
+
+        const gst = totalsData.gst && totalsData.gst !== ""
+          ? totalsData.gst
+          : "";
+
+        // Calculate total: if not provided, use subtotal + freight
+        let total = totalsData.total && totalsData.total !== ""
+          ? totalsData.total
+          : (parseFloat(subtotal) + parseFloat(freight)).toFixed(2);
+
+        return {
+          subtotal: subtotal,
+          freight: freight,
+          freight_description: totalsData.freight_description || "",
+          gst: gst,
+          total: total
+        };
+      })(),
 
       // Payment details
       payment: {

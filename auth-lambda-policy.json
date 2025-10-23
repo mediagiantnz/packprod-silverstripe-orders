@@ -1,0 +1,24 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:ap-southeast-2:235494808985:log-group:/aws/lambda/packprodAuthHandler:*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cognito-idp:InitiateAuth",
+        "cognito-idp:GetUser",
+        "cognito-idp:GlobalSignOut",
+        "cognito-idp:AdminGetUser"
+      ],
+      "Resource": "arn:aws:cognito-idp:ap-southeast-2:235494808985:userpool/ap-southeast-2_0c7Lo2lAa"
+    }
+  ]
+}
