@@ -1,7 +1,8 @@
-import { Home, ShoppingCart, Users, Package, BarChart3, Megaphone, Bell, Settings } from 'lucide-react';
+import { Home, ShoppingCart, Users, Package, BarChart3 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { FEATURES } from '@/config/features';
+
 const navigation = [{
   name: 'Dashboard',
   href: '/',
@@ -28,60 +29,20 @@ const navigation = [{
   icon: BarChart3,
   enabled: FEATURES.REPORTS
 }];
-const futureFeatures = [{
-  name: 'Campaigns',
-  href: '/campaigns',
-  icon: Megaphone,
-  enabled: FEATURES.CAMPAIGNS,
-  badge: 'Phase 5'
-}, {
-  name: 'Alerts',
-  href: '/alerts',
-  icon: Bell,
-  enabled: FEATURES.ALERTS,
-  badge: 'Phase 4'
-}, {
-  name: 'Admin',
-  href: '/admin/users',
-  icon: Settings,
-  enabled: FEATURES.USER_MANAGEMENT,
-  badge: 'Phase 2'
-}];
 export function AppSidebar() {
   return <Sidebar>
-      <SidebarContent className="bg-sidebar-background">
+      <SidebarContent className="bg-slate-800 text-white border-r border-slate-700">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-foreground font-bold text-lg">Packaging Products</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white font-bold text-lg px-4 py-3">Packaging Products</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.map(item => <SidebarMenuItem key={item.name}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.href} className={({
                   isActive
-                }) => isActive ? 'bg-primary text-primary-foreground font-semibold hover:bg-primary-hover' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors'}>
+                }) => isActive ? 'bg-primary text-white font-semibold hover:bg-primary-hover' : 'text-slate-300 hover:bg-slate-700 hover:text-white transition-colors'}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.name}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>)}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Coming Soon</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {futureFeatures.map(item => <SidebarMenuItem key={item.name}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.href} className={({
-                  isActive
-                }) => isActive ? 'bg-primary text-primary-foreground font-semibold hover:bg-primary-hover' : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors'}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.name}</span>
-                      {item.badge && <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-warning/20 text-warning font-medium">
-                          {item.badge}
-                        </span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
