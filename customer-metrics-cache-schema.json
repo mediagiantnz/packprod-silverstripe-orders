@@ -1,0 +1,51 @@
+{
+  "TableName": "packprod-customer-metrics-cache",
+  "AttributeDefinitions": [
+    {
+      "AttributeName": "contactID",
+      "AttributeType": "S"
+    },
+    {
+      "AttributeName": "lastUpdated",
+      "AttributeType": "S"
+    }
+  ],
+  "KeySchema": [
+    {
+      "AttributeName": "contactID",
+      "KeyType": "HASH"
+    }
+  ],
+  "GlobalSecondaryIndexes": [
+    {
+      "IndexName": "lastUpdated-index",
+      "KeySchema": [
+        {
+          "AttributeName": "lastUpdated",
+          "KeyType": "HASH"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    }
+  ],
+  "BillingMode": "PAY_PER_REQUEST",
+  "StreamSpecification": {
+    "StreamEnabled": false
+  },
+  "Tags": [
+    {
+      "Key": "ClientName",
+      "Value": "Packaging Products"
+    },
+    {
+      "Key": "Project",
+      "Value": "WebOrders"
+    },
+    {
+      "Key": "Component",
+      "Value": "CustomerMetricsCache"
+    }
+  ]
+}
